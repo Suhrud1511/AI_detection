@@ -12,7 +12,7 @@ from feature_extraction import build_feature_dataframe, detect_word_et, detect_w
     detect_short_sentences_per_paragraph, mean_diff_in_sentence_length_per_paragraph, std_dev_sentence_length_per_paragraph, \
     detect_apostrophe_per_paragraph, detect_question_mark_per_paragraph, detect_semicolon_colon_per_paragraph, \
     detect_dash_per_paragraph, detect_parentheses_per_paragraph, count_words_per_paragraph, count_sentences_per_paragraph
-
+import pickle
 def train_xgboost_model(X_train, y_train):
     params = {
         'max_depth': 4,
@@ -46,8 +46,12 @@ def predict_submission(model, X_test):
 def plot_roc_auc(fpr, tpr, auc, label):
     plt.plot(fpr, tpr, label=f'{label} (AUC = {auc:.2f})')
 
+def save_model(model, filename):
+    with open(filename, 'wb') as file:
+        pickle.dump(model, file)
+
 def main():
-    df = pd.read_csv('/content/train_essays_7_prompts.csv')
+    df = pd.read_csv("train_essays_7_prompts_v2.csv")
     df_train, df_test = train_test_split(df, test_size=0.2, random_state=42)
 
     df_train_features = build_feature_dataframe(df_train['text'].tolist(), df_train['label'].tolist())
@@ -58,7 +62,7 @@ def main():
 
     xgboost_model = train_xgboost_model(X_train, y_train)
     adaboost_model = train_adaboost_model(X_train, y_train)
-
+    save_model(xgboost_model, 'xgboost_model.pkl')
     xgboost_auc = evaluate_model(xgboost_model, X_test, y_test)
     adaboost_auc = evaluate_model(adaboost_model, X_test, y_test)
 
