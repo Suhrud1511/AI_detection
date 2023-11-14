@@ -30,15 +30,19 @@ def home():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    if request.method == 'POST':
+   noteforscore=" NOTE: AI->Score Closer to 1 & Human-> Score Closer to 0"
+   if request.method == 'POST':
         user_input = request.form['user_input']
         user_input_features = build_feature_dataframe([user_input], [0])
 
         xgboost_prediction = predict_submission(xgboost_model, user_input_features.drop('label', axis=1))
         # adaboost_prediction = predict_submission(adaboost_model, user_input_features.drop('label', axis=1))
-
-
-        return render_template('result.html', prediction=xgboost_prediction*100)
+        if(xgboost_prediction>0.5):
+            pred="AI Generated with a score of :" + str(xgboost_prediction) 
+            return render_template('result.html', prediction=pred)
+        else:
+            pred="Human Generated with a score of" + str(xgboost_prediction)
+            return render_template('result.html', prediction=pred,note=noteforscore)
 
 if __name__ == "__main__":
     app.run(debug=True)

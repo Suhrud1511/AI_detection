@@ -3,13 +3,66 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Text Detection - Result</title>
+  <title>Prediction Result</title>
+  <!-- Link to the Tailwind CSS CDN (You can also install it locally) -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f7fafc;
+      /* Tailwind color */
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      max-width: 600px;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    h1 {
+      color: #2d3748;
+      /* Tailwind color */
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+
+    p {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      color: #4a5568;
+      /* Tailwind color */
+    }
+
+    a {
+      color: #48bb78;
+      /* Tailwind color */
+      text-decoration: underline;
+      display: block;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 
 <body>
-  <h1>AI Text Detection - Result</h1>
-  <p>Prediction: {{ prediction }}</p>
+  <div class="container">
+    <h1 class="font-italic">{{ note }}</h1>
+
+
+    <h1 class="font-semibold">Prediction Result</h1>
+    
+    <p class="text-lg">{{ prediction }}</p>
+    <a href="/" class="text-green-500 hover:text-green-700">Go back to the home page</a>
+  </div>
 </body>
 
 </html>
