@@ -13,26 +13,67 @@ from feature_extraction import build_feature_dataframe, detect_word_et, detect_w
     detect_apostrophe_per_paragraph, detect_question_mark_per_paragraph, detect_semicolon_colon_per_paragraph, \
     detect_dash_per_paragraph, detect_parentheses_per_paragraph, count_words_per_paragraph, count_sentences_per_paragraph
 import pickle
+from sklearn.model_selection import RandomizedSearchCV
+from sklearn.tree import DecisionTreeClassifier
+
 def train_xgboost_model(X_train, y_train):
-    params = {
-        'max_depth': 4,
-        'n_estimators': 50,
-        'learning_rate': 0.2,
-        'objective': 'binary:logistic',
-        'eval_metric': 'auc',
-        'subsample': 1,
-        'colsample_bytree': 1
+   
+    param_grid = {
+        'max_depth': [3, 4, 5],
+        'n_estimators': [50, 100, 150],
+        'learning_rate': [0.1, 0.2, 0.3],
+        'subsample': [0.8, 0.9, 1.0],
+        'colsample_bytree': [0.8, 0.9, 1.0]
     }
 
-    model = xgb.XGBClassifier(**params)
-    model.fit(X_train, y_train)
-    return model
+    
+    xgb_model = xgb.XGBClassifier(objective='binary:logistic', eval_metric='auc')
+
+    
+    xgb_random = RandomizedSearchCV(estimator=xgb_model, param_distributions=param_grid, n_iter=10,
+                                     scoring='roc_auc', n_jobs=-1, cv=5, random_state=42)
+
+    xgb_random.fit(X_train, y_train)
+    best_params = xgb_random.best_params_
+
+    # Use the best parameters to train the final model
+    final_model = xgb.XGBClassifier(**best_params)
+    final_model.fit(X_train, y_train)
+
+    return final_model
+
+
 
 def train_adaboost_model(X_train, y_train):
-    base_estimator = LogisticRegression()
-    model = AdaBoostClassifier(base_estimator=base_estimator, n_estimators=50, learning_rate=0.2, algorithm='SAMME.R')
-    model.fit(X_train, y_train)
-    return model
+   
+    param_grid = {
+        'base_estimator__max_depth': [2, 3, 4],
+        'n_estimators': [50, 100, 150],
+        'learning_rate': [0.1, 0.2, 0.3]
+    }
+
+    base_estimator = DecisionTreeClassifier()
+
+    adaboost_model = AdaBoostClassifier(base_estimator=base_estimator, algorithm='SAMME.R')
+
+   
+    adaboost_random = RandomizedSearchCV(estimator=adaboost_model, param_distributions=param_grid, n_iter=10,
+                                         scoring='roc_auc', n_jobs=-1, cv=5, random_state=42)
+    
+    adaboost_random.fit(X_train, y_train)
+    best_params = adaboost_random.best_params_
+   
+    best_base_estimator = DecisionTreeClassifier(max_depth=best_params['base_estimator__max_depth'])
+    adaboost_model = AdaBoostClassifier(base_estimator=best_base_estimator, n_estimators=best_params['n_estimators'],
+                                        learning_rate=best_params['learning_rate'], algorithm='SAMME.R')
+
+    # Train the final AdaBoost model
+    adaboost_model.fit(X_train, y_train)
+
+    return adaboost_model
+
+ 
+
 
 def evaluate_model(model, X_test, y_test):
     y_pred = model.predict_proba(X_test)
