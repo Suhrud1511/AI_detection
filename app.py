@@ -39,7 +39,7 @@ def predict():
         # adaboost_prediction = predict_submission(adaboost_model, user_input_features.drop('label', axis=1))
         if(xgboost_prediction>0.5):
             pred="AI Generated with a score of :" + str(xgboost_prediction) 
-            return render_template('result.html', prediction=pred)
+            return render_template('result.html', prediction=pred,note=noteforscore)
         else:
             pred="Human Generated with a score of" + str(xgboost_prediction)
             return render_template('result.html', prediction=pred,note=noteforscore)
