@@ -18,8 +18,6 @@ import pickle
 app = Flask(__name__)
 
 import pickle
-
-# Load the XGBoost model
 with open('xgboost_model.pkl', 'rb') as file:
     xgboost_model = pickle.load(file)
 
